@@ -121,7 +121,9 @@ defmodule ExpenseTracker.Expenses do
 
   """
   def list_expenses do
-    Repo.all(Expense)
+    Expense
+    |> Repo.all()
+    |> Repo.preload(:category)
   end
 
   @doc """
@@ -138,7 +140,11 @@ defmodule ExpenseTracker.Expenses do
       ** (Ecto.NoResultsError)
 
   """
-  def get_expense!(id), do: Repo.get!(Expense, id)
+  def get_expense!(id) do
+    Expense
+    |> Repo.get!(id)
+    |> Repo.preload(:category)
+  end
 
   @doc """
   Creates a expense.
