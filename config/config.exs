@@ -9,7 +9,7 @@ import Config
 
 config :expense_tracker,
   ecto_repos: [ExpenseTracker.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime, binary_id: true]
 
 # Configures the endpoint
 config :expense_tracker, ExpenseTrackerWeb.Endpoint,

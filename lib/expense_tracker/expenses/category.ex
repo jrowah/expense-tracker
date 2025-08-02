@@ -2,6 +2,7 @@ defmodule ExpenseTracker.Expenses.Category do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @primary_key {:id, :binary_id, autogenerate: true}
   schema "categories" do
     field :name, :string
     field :description, :string

@@ -4,6 +4,8 @@ defmodule ExpenseTracker.Expenses.Expense do
 
   alias ExpenseTracker.Expenses.Category
 
+  @primary_key {:id, :binary_id, autogenerate: true}
+  @foreign_key_type :binary_id
   schema "expenses" do
     field :date, :date
     field :description, :string
