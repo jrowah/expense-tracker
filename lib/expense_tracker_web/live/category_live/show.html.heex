@@ -5,14 +5,37 @@
     <.link patch={~p"/categories/#{@category}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit category</.button>
     </.link>
+    <.link navigate={~p"/categories/#{@category.id}/expenses/new"}>
+      <.button>Add Expense</.button>
+    </.link>
   </:actions>
 </.header>
 
 <.list>
   <:item title="Name">{@category.name}</:item>
   <:item title="Description">{@category.description}</:item>
-  <:item title="Monthly budget">{@category.monthly_budget}</:item>
+  <:item title="Monthly budget">${@category.monthly_budget}</:item>
 </.list>
+
+<div class="mt-8">
+  <h3 class="text-lg font-semibold mb-4">Recent Expenses</h3>
+  <div :if={Enum.empty?(@category.expenses)} class="text-gray-500 italic">
+    No expenses yet. <.link navigate={~p"/categories/#{@category.id}/expenses/new"} class="text-blue-600 hover:underline">Add the first one</.link>
+  </div>
+  <.table 
+    :if={not Enum.empty?(@category.expenses)}
+    id="category-expenses" 
+    rows={@category.expenses}
+    row_click={fn expense -> JS.navigate(~p"/expenses/#{expense}") end}
+  >
+    <:col :let={expense} label="Description">{expense.description}</:col>
+    <:col :let={expense} label="Amount">${expense.amount}</:col>
+    <:col :let={expense} label="Date">{expense.date}</:col>
+    <:action :let={expense}>
+      <.link navigate={~p"/expenses/#{expense}/edit"}>Edit</.link>
+    </:action>
+  </.table>
+</div>
 
 <.back navigate={~p"/categories"}>Back to categories</.back>
 

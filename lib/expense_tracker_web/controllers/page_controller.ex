@@ -1,9 +1,9 @@
 defmodule ExpenseTrackerWeb.PageController do
   use ExpenseTrackerWeb, :controller
+  alias ExpenseTracker.Expenses
 
   def home(conn, _params) do
-    # The home page is often custom made,
-    # so skip the default app layout.
-    render(conn, :home, layout: false)
+    categories = Expenses.list_categories()
+    render(conn, :home, categories: categories)
   end
 end
