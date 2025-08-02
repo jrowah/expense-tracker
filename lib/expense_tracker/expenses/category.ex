@@ -7,6 +7,8 @@ defmodule ExpenseTracker.Expenses.Category do
     field :description, :string
     field :monthly_budget, :decimal
 
+    has_many :expenses, ExpenseTracker.Expenses.Expense
+
     timestamps(type: :utc_datetime)
   end
 
@@ -15,5 +17,9 @@ defmodule ExpenseTracker.Expenses.Category do
     category
     |> cast(attrs, [:name, :description, :monthly_budget])
     |> validate_required([:name, :description, :monthly_budget])
+    |> unique_constraint(:name)
+    |> validate_number(:monthly_budget, greater_than: 0)
+    |> validate_length(:name, min: 1, max: 100)
+    |> validate_length(:description, max: 500)
   end
 end
