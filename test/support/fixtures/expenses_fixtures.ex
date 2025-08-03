@@ -24,13 +24,23 @@ defmodule ExpenseTracker.ExpensesFixtures do
   Generate a expense.
   """
   def expense_fixture(attrs \\ %{}) do
+    # Create a category first if none provided
+    category =
+      case Map.get(attrs, :category_id) do
+        nil -> category_fixture()
+        _id -> nil
+      end
+
+    category_id = (category && category.id) || Map.get(attrs, :category_id)
+
     {:ok, expense} =
       attrs
       |> Enum.into(%{
         amount: "120.5",
         date: ~D[2025-08-01],
         description: "some description",
-        notes: "some notes"
+        notes: "some notes",
+        category_id: category_id
       })
       |> ExpenseTracker.Expenses.create_expense()
 

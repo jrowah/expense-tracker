@@ -20,7 +20,7 @@
 <div class="mt-8">
   <h3 class="text-lg font-semibold mb-4">Recent Expenses</h3>
   <div :if={Enum.empty?(@category.expenses)} class="text-gray-500 italic">
-    No expenses yet. <.link navigate={~p"/categories/#{@category.id}/expenses/new"} class="text-blue-600 hover:underline">Add the first one</.link>
+    No expenses yet. <.link navigate={~p"/categories/#{@category.id}/expenses/new"} class="text-blue-600 hover:underline">Add One</.link>
   </div>
   <.table 
     :if={not Enum.empty?(@category.expenses)}

@@ -3,76 +3,8 @@
   <:subtitle>Overview of your expenses and budget tracking</:subtitle>
 </.header>
 
-<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-  <div :for={category <- @categories} class="bg-white rounded-lg border border-gray-200 p-6">
-    <div class="flex items-center justify-between">
-      <h3 class="text-lg font-semibold text-gray-900">
-        <.link navigate={~p"/categories/#{category.id}"} class="hover:text-blue-600">
-          {category.name}
-        </.link>
-      </h3>
-    </div>
-    
-    <p class="mt-2 text-sm text-gray-600">{category.description}</p>
-    
-    <div class="mt-4">
-      <div class="flex justify-between text-sm">
-        <span class="text-gray-500">Monthly Budget</span>
-        <span class="font-medium">${category.monthly_budget}</span>
-      </div>
-      
-      <% current_month_total = category.expenses 
-        |> Enum.filter(&(Date.beginning_of_month(Date.utc_today()) <= &1.date && &1.date <= Date.end_of_month(Date.utc_today()))) 
-        |> Enum.map(& &1.amount) 
-        |> Enum.reduce(Decimal.new("0"), &Decimal.add/2) %>
-      
-      <div class="flex justify-between text-sm mt-1">
-        <span class="text-gray-500">This Month</span>
-        <span class="font-medium text-red-600">
-          ${current_month_total}
-        </span>
-      </div>
-      
-      <% budget_percentage = if Decimal.positive?(category.monthly_budget) do
-          current_month_total
-          |> Decimal.div(category.monthly_budget) 
-          |> Decimal.mult(100) 
-          |> Decimal.to_float() 
-          |> min(100)
-        else
-          0
-        end %>
-      
-      <div class="mt-2">
-        <div class="flex justify-between text-xs text-gray-500 mb-1">
-          <span>Budget Used</span>
-          <span><%= :erlang.float_to_binary(budget_percentage * 1.0, [decimals: 1]) %>%</span>
-        </div>
-        <div class="w-full bg-gray-200 rounded-full h-2">
-          <div 
-            class={"h-2 rounded-full #{if budget_percentage > 90, do: "bg-red-500", else: (if budget_percentage > 75, do: "bg-yellow-500", else: "bg-green-500")}"}
-            style={"width: #{budget_percentage}%"}
-          ></div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="mt-4 pt-4 border-t border-gray-100">
-      <div class="flex justify-between text-sm">
-        <span class="text-gray-500">Recent Expenses</span>
-        <span class="text-gray-500">{length(category.expenses)}</span>
-      </div>
-      <div :if={not Enum.empty?(category.expenses)} class="mt-2 space-y-1">
-        <div :for={expense <- Enum.take(category.expenses, 3)} class="flex justify-between text-xs">
-          <span class="text-gray-600 truncate">{expense.description}</span>
-          <span class="text-gray-900 font-medium">${expense.amount}</span>
-        </div>
-      </div>
-      <div :if={Enum.empty?(category.expenses)} class="mt-2 text-xs text-gray-400 italic">
-        No expenses yet
-      </div>
-    </div>
-  </div>
+<div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-2">
+  <.category_card :for={category <- @categories} category={category} />
 </div>
 
 <div :if={Enum.empty?(@categories)} class="text-center py-12">

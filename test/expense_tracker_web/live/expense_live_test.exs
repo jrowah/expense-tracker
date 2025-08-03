@@ -4,13 +4,10 @@ defmodule ExpenseTrackerWeb.ExpenseLiveTest do
   import Phoenix.LiveViewTest
   import ExpenseTracker.ExpensesFixtures
 
-  @create_attrs %{date: "2025-08-01", description: "some description", amount: "120.5", notes: "some notes"}
-  @update_attrs %{date: "2025-08-02", description: "some updated description", amount: "456.7", notes: "some updated notes"}
-  @invalid_attrs %{date: nil, description: nil, amount: nil, notes: nil}
-
   defp create_expense(_) do
     expense = expense_fixture()
-    %{expense: expense}
+    category = ExpenseTracker.Expenses.get_category!(expense.category_id)
+    %{expense: expense, category: category}
   end
 
   describe "Index" do
@@ -23,7 +20,17 @@ defmodule ExpenseTrackerWeb.ExpenseLiveTest do
       assert html =~ expense.description
     end
 
-    test "saves new expense", %{conn: conn} do
+    test "saves new expense", %{conn: conn, category: category} do
+      create_attrs = %{
+        date: "2025-08-01",
+        description: "some description",
+        amount: "120.5",
+        notes: "some notes",
+        category_id: category.id
+      }
+
+      invalid_attrs = %{date: nil, description: nil, amount: nil, notes: nil}
+
       {:ok, index_live, _html} = live(conn, ~p"/expenses")
 
       assert index_live |> element("a", "New Expense") |> render_click() =~
@@ -32,11 +39,11 @@ defmodule ExpenseTrackerWeb.ExpenseLiveTest do
       assert_patch(index_live, ~p"/expenses/new")
 
       assert index_live
-             |> form("#expense-form", expense: @invalid_attrs)
+             |> form("#expense-form", expense: invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       assert index_live
-             |> form("#expense-form", expense: @create_attrs)
+             |> form("#expense-form", expense: create_attrs)
              |> render_submit()
 
       assert_patch(index_live, ~p"/expenses")
@@ -46,7 +53,15 @@ defmodule ExpenseTrackerWeb.ExpenseLiveTest do
       assert html =~ "some description"
     end
 
-    test "updates expense in listing", %{conn: conn, expense: expense} do
+    test "updates expense in listing", %{conn: conn, expense: expense, category: category} do
+      update_attrs = %{
+        date: "2025-08-02",
+        description: "some updated description",
+        amount: "456.7",
+        notes: "some updated notes",
+        category_id: category.id
+      }
+
       {:ok, index_live, _html} = live(conn, ~p"/expenses")
 
       assert index_live |> element("#expenses-#{expense.id} a", "Edit") |> render_click() =~
@@ -54,12 +69,14 @@ defmodule ExpenseTrackerWeb.ExpenseLiveTest do
 
       assert_patch(index_live, ~p"/expenses/#{expense}/edit")
 
+      invalid_attrs = %{date: nil, description: nil, amount: nil, notes: nil}
+
       assert index_live
-             |> form("#expense-form", expense: @invalid_attrs)
+             |> form("#expense-form", expense: invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       assert index_live
-             |> form("#expense-form", expense: @update_attrs)
+             |> form("#expense-form", expense: update_attrs)
              |> render_submit()
 
       assert_patch(index_live, ~p"/expenses")
@@ -87,7 +104,17 @@ defmodule ExpenseTrackerWeb.ExpenseLiveTest do
       assert html =~ expense.description
     end
 
-    test "updates expense within modal", %{conn: conn, expense: expense} do
+    test "updates expense within modal", %{conn: conn, expense: expense, category: category} do
+      update_attrs = %{
+        date: "2025-08-02",
+        description: "some updated description",
+        amount: "456.7",
+        notes: "some updated notes",
+        category_id: category.id
+      }
+
+      invalid_attrs = %{date: nil, description: nil, amount: nil, notes: nil}
+
       {:ok, show_live, _html} = live(conn, ~p"/expenses/#{expense}")
 
       assert show_live |> element("a", "Edit") |> render_click() =~
@@ -96,11 +123,11 @@ defmodule ExpenseTrackerWeb.ExpenseLiveTest do
       assert_patch(show_live, ~p"/expenses/#{expense}/show/edit")
 
       assert show_live
-             |> form("#expense-form", expense: @invalid_attrs)
+             |> form("#expense-form", expense: invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
       assert show_live
-             |> form("#expense-form", expense: @update_attrs)
+             |> form("#expense-form", expense: update_attrs)
              |> render_submit()
 
       assert_patch(show_live, ~p"/expenses/#{expense}")

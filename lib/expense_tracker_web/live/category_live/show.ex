@@ -43,6 +43,11 @@ defmodule ExpenseTrackerWeb.CategoryLive.Show do
     end
   end
 
+  @impl true
+  def handle_info({ExpenseTrackerWeb.CategoryLive.FormComponent, {:saved, category}}, socket) do
+    {:noreply, assign(socket, category: category)}
+  end
+
   defp page_title(:show), do: "Show Category"
   defp page_title(:edit), do: "Edit Category"
 end

@@ -4,8 +4,16 @@ defmodule ExpenseTrackerWeb.CategoryLiveTest do
   import Phoenix.LiveViewTest
   import ExpenseTracker.ExpensesFixtures
 
-  @create_attrs %{name: "some name", description: "some description", monthly_budget: "120.5"}
-  @update_attrs %{name: "some updated name", description: "some updated description", monthly_budget: "456.7"}
+  @create_attrs %{
+    name: "new test category",
+    description: "some description",
+    monthly_budget: "120.5"
+  }
+  @update_attrs %{
+    name: "some updated name",
+    description: "some updated description",
+    monthly_budget: "456.7"
+  }
   @invalid_attrs %{name: nil, description: nil, monthly_budget: nil}
 
   defp create_category(_) do
@@ -35,15 +43,17 @@ defmodule ExpenseTrackerWeb.CategoryLiveTest do
              |> form("#category-form", category: @invalid_attrs)
              |> render_change() =~ "can&#39;t be blank"
 
-      assert index_live
-             |> form("#category-form", category: @create_attrs)
-             |> render_submit()
+      result =
+        index_live
+        |> form("#category-form", category: @create_attrs)
+        |> render_submit()
 
+      assert result =~ "Category created successfully"
       assert_patch(index_live, ~p"/categories")
 
       html = render(index_live)
       assert html =~ "Category created successfully"
-      assert html =~ "some name"
+      assert html =~ "new test category"
     end
 
     test "updates category in listing", %{conn: conn, category: category} do
