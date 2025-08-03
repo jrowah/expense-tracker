@@ -5,7 +5,7 @@ defmodule ExpenseTracker.Repo.Migrations.CreateExpenses do
     create table(:expenses, primary_key: false) do
       add :id, :binary_id, primary_key: true
       add :description, :string
-      add :amount, :decimal
+      add :amount, :decimal, precision: 10, scale: 2, null: false
       add :date, :date
       add :notes, :text
       add :category_id, references(:categories, type: :binary_id, on_delete: :nothing)
