@@ -42,7 +42,9 @@ defmodule ExpenseTrackerWeb.ExpenseLive.Index do
 
   @impl true
   def handle_info({ExpenseTrackerWeb.ExpenseLive.FormComponent, {:saved, expense}}, socket) do
-    {:noreply, stream_insert(socket, :expenses, expense)}
+    # Reload the expense with category preloaded
+    expense_with_category = Expenses.get_expense!(expense.id)
+    {:noreply, stream_insert(socket, :expenses, expense_with_category)}
   end
 
   @impl true

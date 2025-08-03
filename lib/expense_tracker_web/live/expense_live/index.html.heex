@@ -39,11 +39,6 @@
     title={@page_title}
     action={@live_action}
     expense={@expense}
-    patch={
-      case @live_action do
-        :new_for_category -> ~p"/categories/#{@expense.category_id}"
-        _ -> ~p"/expenses"
-      end
-    }
+    patch={~p"/expenses"}
   />
 </.modal>

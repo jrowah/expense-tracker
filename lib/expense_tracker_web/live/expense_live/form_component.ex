@@ -66,6 +66,13 @@ defmodule ExpenseTrackerWeb.ExpenseLive.FormComponent do
       {:ok, expense} ->
         notify_parent({:saved, expense})
 
+        # Broadcast the expense update to update spending totals
+        Phoenix.PubSub.broadcast(
+          ExpenseTracker.PubSub,
+          "expense_updates",
+          {:expense_updated, expense}
+        )
+
         {:noreply,
          socket
          |> put_flash(:info, "Expense updated successfully")
@@ -76,15 +83,31 @@ defmodule ExpenseTrackerWeb.ExpenseLive.FormComponent do
     end
   end
 
-  defp save_expense(socket, :new, expense_params) do
+  defp save_expense(socket, action, expense_params) when action in [:new, :new_for_category] do
     case Expenses.create_expense(expense_params) do
       {:ok, expense} ->
         notify_parent({:saved, expense})
 
-        {:noreply,
-         socket
-         |> put_flash(:info, "Expense created successfully")
-         |> push_patch(to: socket.assigns.patch)}
+        # Broadcast the expense creation to update spending totals
+        Phoenix.PubSub.broadcast(
+          ExpenseTracker.PubSub,
+          "expense_updates",
+          {:expense_created, expense}
+        )
+
+        case action do
+          :new_for_category ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Expense created successfully")
+             |> push_navigate(to: ~p"/categories/#{expense.category_id}")}
+
+          :new ->
+            {:noreply,
+             socket
+             |> put_flash(:info, "Expense created successfully")
+             |> push_patch(to: socket.assigns.patch)}
+        end
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}
