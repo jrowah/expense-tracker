@@ -4,6 +4,7 @@ defmodule ExpenseTracker.Expenses do
   """
 
   import Ecto.Query, warn: false
+  import Ecto.Changeset, only: [get_change: 2, get_field: 2]
   alias ExpenseTracker.Repo
 
   alias ExpenseTracker.Expenses.{
@@ -147,7 +148,7 @@ defmodule ExpenseTracker.Expenses do
   end
 
   @doc """
-  Creates a expense.
+  Creates a expense with concurrency safety and optional budget validation.
 
   ## Examples
 
@@ -158,14 +159,37 @@ defmodule ExpenseTracker.Expenses do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_expense(attrs \\ %{}) do
-    %Expense{}
-    |> Expense.changeset(attrs)
-    |> Repo.insert()
+  def create_expense(attrs \\ %{}, opts \\ []) do
+    validate_budget = Keyword.get(opts, :validate_budget, false)
+
+    # Use a transaction for concurrency safety
+    Repo.transaction(fn ->
+      with {:ok, changeset} <- validate_expense_creation(attrs, validate_budget),
+           {:ok, expense} <- Repo.insert(changeset) do
+        # Broadcast the expense creation
+        Phoenix.PubSub.broadcast(
+          ExpenseTracker.PubSub,
+          "expense_updates",
+          {:expense_created, expense}
+        )
+
+        expense
+      else
+        {:error, :budget_exceeded, analysis} ->
+          Repo.rollback({:budget_exceeded, analysis})
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
+      end
+    end)
+    |> case do
+      {:ok, expense} -> {:ok, expense}
+      {:error, changeset} -> {:error, changeset}
+    end
   end
 
   @doc """
-  Updates a expense.
+  Updates a expense with concurrency safety.
 
   ## Examples
 
@@ -176,10 +200,85 @@ defmodule ExpenseTracker.Expenses do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_expense(%Expense{} = expense, attrs) do
-    expense
-    |> Expense.changeset(attrs)
-    |> Repo.update()
+  def update_expense(%Expense{} = expense, attrs, opts \\ []) do
+    validate_budget = Keyword.get(opts, :validate_budget, false)
+
+    Repo.transaction(fn ->
+      with {:ok, changeset} <- validate_expense_update(expense, attrs, validate_budget),
+           {:ok, updated_expense} <- Repo.update(changeset) do
+        # Broadcast the expense update
+        Phoenix.PubSub.broadcast(
+          ExpenseTracker.PubSub,
+          "expense_updates",
+          {:expense_updated, updated_expense}
+        )
+
+        updated_expense
+      else
+        {:error, :budget_exceeded, analysis} ->
+          Repo.rollback({:budget_exceeded, analysis})
+
+        {:error, changeset} ->
+          Repo.rollback(changeset)
+      end
+    end)
+    |> case do
+      {:ok, expense} -> {:ok, expense}
+      {:error, changeset} -> {:error, changeset}
+    end
+  end
+
+  # Private helper for expense creation validation
+  defp validate_expense_creation(attrs, validate_budget) do
+    changeset = Expense.changeset(%Expense{}, attrs)
+
+    if changeset.valid? and validate_budget do
+      category_id = get_change(changeset, :category_id) || get_field(changeset, :category_id)
+
+      case validate_budget_impact(attrs, category_id) do
+        {:ok, analysis} ->
+          if analysis.projected.would_exceed do
+            {:error, :budget_exceeded, analysis}
+          else
+            {:ok, changeset}
+          end
+      end
+    else
+      if changeset.valid?, do: {:ok, changeset}, else: {:error, changeset}
+    end
+  end
+
+  # Private helper for expense update validation
+  defp validate_expense_update(expense, attrs, validate_budget) do
+    changeset = Expense.changeset(expense, attrs)
+
+    if changeset.valid? and validate_budget do
+      # For updates, we need to calculate the net change in amount
+      old_amount = expense.amount
+      new_amount = get_change(changeset, :amount) || old_amount
+      amount_diff = Decimal.sub(new_amount, old_amount)
+
+      if Decimal.compare(amount_diff, Decimal.new("0.00")) != :eq do
+        # Only validate if amount actually changed
+        category_id = get_change(changeset, :category_id) || expense.category_id
+
+        # Create temporary attrs for validation with the difference
+        temp_attrs = %{"amount" => Decimal.to_string(amount_diff)}
+
+        case validate_budget_impact(temp_attrs, category_id) do
+          {:ok, analysis} ->
+            if analysis.projected.would_exceed do
+              {:error, :budget_exceeded, analysis}
+            else
+              {:ok, changeset}
+            end
+        end
+      else
+        {:ok, changeset}
+      end
+    else
+      if changeset.valid?, do: {:ok, changeset}, else: {:error, changeset}
+    end
   end
 
   @doc """
@@ -221,22 +320,111 @@ defmodule ExpenseTracker.Expenses do
     )
     |> Repo.one()
     |> case do
-      nil -> Decimal.new(0)
-      total -> total
+      nil -> Decimal.new("0.00")
+      total -> Decimal.round(total, 2)
     end
   end
 
-  def spending_percentage(category) do
+  @doc """
+  Calculates spending percentage for a category.
+  Returns a map with percentage, status, and over-budget amount if applicable.
+  """
+  def budget_analysis(category) do
     total_expenses = total_expenses_by_category(category.id)
+    budget = Decimal.round(category.monthly_budget, 2)
 
-    if Decimal.compare(category.monthly_budget, Decimal.new(0)) == :gt do
-      total_expenses
-      |> Decimal.div(category.monthly_budget)
-      |> Decimal.mult(100)
-      |> Decimal.round(1)
-      |> Decimal.to_float()
-    else
-      0.0
-    end
+    percentage =
+      if Decimal.compare(budget, Decimal.new("0.00")) == :gt do
+        total_expenses
+        |> Decimal.div(budget)
+        |> Decimal.mult(Decimal.new("100"))
+        |> Decimal.round(1)
+        |> Decimal.to_float()
+      else
+        0.0
+      end
+
+    over_budget_amount =
+      case Decimal.compare(total_expenses, budget) do
+        :gt -> Decimal.sub(total_expenses, budget) |> Decimal.round(2)
+        _ -> Decimal.new("0.00")
+      end
+
+    remaining_budget =
+      case Decimal.compare(budget, total_expenses) do
+        :gt -> Decimal.sub(budget, total_expenses) |> Decimal.round(2)
+        _ -> Decimal.new("0.00")
+      end
+
+    status =
+      cond do
+        percentage >= 100.0 -> :over_budget
+        percentage >= 90.0 -> :warning
+        percentage >= 75.0 -> :caution
+        true -> :good
+      end
+
+    %{
+      total_expenses: total_expenses,
+      budget: budget,
+      percentage: percentage,
+      status: status,
+      over_budget_amount: over_budget_amount,
+      remaining_budget: remaining_budget
+    }
+  end
+
+  # Backward compatibility
+  def spending_percentage(category) do
+    budget_analysis(category).percentage
+  end
+
+  @doc """
+  Validates if adding an expense would exceed the budget.
+  Returns {:ok, expense} or {:error, :budget_exceeded, analysis}.
+  """
+  def validate_budget_impact(expense_attrs, category_id) do
+    category = get_category!(category_id)
+    current_analysis = budget_analysis(category)
+
+    # Extract amount and ensure it's a Decimal
+    amount =
+      case expense_attrs["amount"] || expense_attrs[:amount] do
+        %Decimal{} = decimal_amount ->
+          decimal_amount
+
+        string_amount when is_binary(string_amount) ->
+          case Decimal.parse(string_amount) do
+            {parsed_amount, _} -> parsed_amount
+            :error -> Decimal.new("0")
+          end
+
+        _none ->
+          Decimal.new("0")
+      end
+
+    projected_total = Decimal.add(current_analysis.total_expenses, amount)
+
+    projected_percentage =
+      if Decimal.compare(current_analysis.budget, Decimal.new("0.00")) == :gt do
+        projected_total
+        |> Decimal.div(current_analysis.budget)
+        |> Decimal.mult(Decimal.new("100"))
+        |> Decimal.round(1)
+        |> Decimal.to_float()
+      else
+        0.0
+      end
+
+    analysis = %{
+      current: current_analysis,
+      projected: %{
+        total_expenses: projected_total,
+        percentage: projected_percentage,
+        would_exceed: projected_percentage > 100.0
+      }
+    }
+
+    {:ok, analysis}
   end
 end

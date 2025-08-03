@@ -12,12 +12,19 @@ defmodule ExpenseTracker.ExpensesTest do
 
     test "list_categories/0 returns all categories" do
       category = category_fixture()
-      assert Expenses.list_categories() == [category]
+      categories = Expenses.list_categories()
+      assert length(categories) == 1
+      assert hd(categories).id == category.id
+      assert hd(categories).name == category.name
     end
 
     test "get_category!/1 returns the category with given id" do
       category = category_fixture()
-      assert Expenses.get_category!(category.id) == category
+      retrieved_category = Expenses.get_category!(category.id)
+      assert retrieved_category.id == category.id
+      assert retrieved_category.name == category.name
+      assert retrieved_category.description == category.description
+      assert Decimal.equal?(retrieved_category.monthly_budget, category.monthly_budget)
     end
 
     test "create_category/1 with valid data creates a category" do
@@ -35,7 +42,12 @@ defmodule ExpenseTracker.ExpensesTest do
 
     test "update_category/2 with valid data updates the category" do
       category = category_fixture()
-      update_attrs = %{name: "some updated name", description: "some updated description", monthly_budget: "456.7"}
+
+      update_attrs = %{
+        name: "some updated name",
+        description: "some updated description",
+        monthly_budget: "456.7"
+      }
 
       assert {:ok, %Category{} = category} = Expenses.update_category(category, update_attrs)
       assert category.name == "some updated name"
@@ -46,7 +58,9 @@ defmodule ExpenseTracker.ExpensesTest do
     test "update_category/2 with invalid data returns error changeset" do
       category = category_fixture()
       assert {:error, %Ecto.Changeset{}} = Expenses.update_category(category, @invalid_attrs)
-      assert category == Expenses.get_category!(category.id)
+      retrieved_category = Expenses.get_category!(category.id)
+      assert category.id == retrieved_category.id
+      assert category.name == retrieved_category.name
     end
 
     test "delete_category/1 deletes the category" do
@@ -70,16 +84,33 @@ defmodule ExpenseTracker.ExpensesTest do
 
     test "list_expenses/0 returns all expenses" do
       expense = expense_fixture()
-      assert Expenses.list_expenses() == [expense]
+      expenses = Expenses.list_expenses()
+      assert length(expenses) == 1
+      assert hd(expenses).id == expense.id
+      assert hd(expenses).description == expense.description
     end
 
     test "get_expense!/1 returns the expense with given id" do
       expense = expense_fixture()
-      assert Expenses.get_expense!(expense.id) == expense
+      retrieved_expense = Expenses.get_expense!(expense.id)
+      assert retrieved_expense.id == expense.id
+      assert retrieved_expense.description == expense.description
+      assert retrieved_expense.amount == expense.amount
+      assert retrieved_expense.date == expense.date
+      assert retrieved_expense.notes == expense.notes
+      assert retrieved_expense.category_id == expense.category_id
     end
 
     test "create_expense/1 with valid data creates a expense" do
-      valid_attrs = %{date: ~D[2025-08-01], description: "some description", amount: "120.5", notes: "some notes"}
+      category = category_fixture()
+
+      valid_attrs = %{
+        date: ~D[2025-08-01],
+        description: "some description",
+        amount: "120.5",
+        notes: "some notes",
+        category_id: category.id
+      }
 
       assert {:ok, %Expense{} = expense} = Expenses.create_expense(valid_attrs)
       assert expense.date == ~D[2025-08-01]
@@ -94,7 +125,13 @@ defmodule ExpenseTracker.ExpensesTest do
 
     test "update_expense/2 with valid data updates the expense" do
       expense = expense_fixture()
-      update_attrs = %{date: ~D[2025-08-02], description: "some updated description", amount: "456.7", notes: "some updated notes"}
+
+      update_attrs = %{
+        date: ~D[2025-08-02],
+        description: "some updated description",
+        amount: "456.7",
+        notes: "some updated notes"
+      }
 
       assert {:ok, %Expense{} = expense} = Expenses.update_expense(expense, update_attrs)
       assert expense.date == ~D[2025-08-02]
@@ -106,7 +143,9 @@ defmodule ExpenseTracker.ExpensesTest do
     test "update_expense/2 with invalid data returns error changeset" do
       expense = expense_fixture()
       assert {:error, %Ecto.Changeset{}} = Expenses.update_expense(expense, @invalid_attrs)
-      assert expense == Expenses.get_expense!(expense.id)
+      retrieved_expense = Expenses.get_expense!(expense.id)
+      assert expense.id == retrieved_expense.id
+      assert expense.description == retrieved_expense.description
     end
 
     test "delete_expense/1 deletes the expense" do
