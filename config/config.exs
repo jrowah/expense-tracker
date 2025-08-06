@@ -61,6 +61,15 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
+# Configure Oban
+config :expense_tracker, Oban,
+  repo: ExpenseTracker.Repo,
+  plugins: [Oban.Plugins.Pruner],
+  queues: [default: 10, receipt_processing: 5]
+
+# Configure OpenAI (set OPENAI_API_KEY environment variable)
+config :expense_tracker, :openai_api_key, System.get_env("OPENAI_API_KEY")
+
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"

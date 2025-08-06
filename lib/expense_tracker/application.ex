@@ -10,6 +10,7 @@ defmodule ExpenseTracker.Application do
     children = [
       ExpenseTrackerWeb.Telemetry,
       ExpenseTracker.Repo,
+      {Oban, Application.fetch_env!(:expense_tracker, Oban)},
       {DNSCluster, query: Application.get_env(:expense_tracker, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: ExpenseTracker.PubSub},
       # Start the Finch HTTP client for sending emails

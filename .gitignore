@@ -35,3 +35,18 @@ expense_tracker-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Expenditure files
+/priv/static/uploads/receipts/
+
+*.env*
+
+data/*
+
+*.DS_Store
+
+.certs/
+
+.elixir_ls/
+
+*node_modules*
+

@@ -58,7 +58,10 @@ defmodule ExpenseTracker.MixProject do
       {:gettext, "~> 0.26"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
-      {:bandit, "~> 1.5"}
+      {:bandit, "~> 1.5"},
+      {:oban, "~> 2.17"},
+      {:req, "~> 0.5"},
+      {:fuzzy_compare, "~> 1.1"}
     ]
   end
 

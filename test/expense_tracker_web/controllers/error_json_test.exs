@@ -2,7 +2,9 @@ defmodule ExpenseTrackerWeb.ErrorJSONTest do
   use ExpenseTrackerWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert ExpenseTrackerWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert ExpenseTrackerWeb.ErrorJSON.render("404.json", %{}) == %{
+             errors: %{detail: "Not Found"}
+           }
   end
 
   test "renders 500" do
