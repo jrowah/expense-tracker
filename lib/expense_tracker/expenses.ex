@@ -9,7 +9,8 @@ defmodule ExpenseTracker.Expenses do
 
   alias ExpenseTracker.Expenses.{
     Category,
-    Expense
+    Expense,
+    Receipt
   }
 
   @doc """
@@ -426,5 +427,142 @@ defmodule ExpenseTracker.Expenses do
     }
 
     {:ok, analysis}
+  end
+
+  @doc """
+  Gets a single category by name.
+
+  ## Examples
+
+      iex> get_category_by_name("Food & Dining")
+      %Category{}
+
+      iex> get_category_by_name("Non-existent")
+      nil
+
+  """
+  def get_category_by_name(name) do
+    Repo.get_by(Category, name: name)
+  end
+
+  @doc """
+  Returns the list of receipts.
+
+  ## Examples
+
+      iex> list_receipts()
+      [%Receipt{}, ...]
+
+  """
+  def list_receipts do
+    Receipt
+    |> Repo.all()
+    |> Repo.preload(:expense)
+  end
+
+  @doc """
+  Gets a single receipt.
+
+  Raises `Ecto.NoResultsError` if the Receipt does not exist.
+
+  ## Examples
+
+      iex> get_receipt!(123)
+      %Receipt{}
+
+      iex> get_receipt!(456)
+      ** (Ecto.NoResultsError)
+
+  """
+  def get_receipt!(id) do
+    Receipt
+    |> Repo.get!(id)
+    |> Repo.preload(:expense)
+  end
+
+  @doc """
+  Gets a single receipt by ID, returning nil if not found.
+
+  ## Examples
+
+      iex> get_receipt(123)
+      %Receipt{}
+
+      iex> get_receipt(456)
+      nil
+
+  """
+  def get_receipt(id) do
+    Receipt
+    |> Repo.get(id)
+    |> case do
+      nil -> nil
+      receipt -> Repo.preload(receipt, :expense)
+    end
+  end
+
+  @doc """
+  Creates a receipt.
+
+  ## Examples
+
+      iex> create_receipt(%{field: value})
+      {:ok, %Receipt{}}
+
+      iex> create_receipt(%{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_receipt(attrs \\ %{}) do
+    %Receipt{}
+    |> Receipt.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates a receipt.
+
+  ## Examples
+
+      iex> update_receipt(receipt, %{field: new_value})
+      {:ok, %Receipt{}}
+
+      iex> update_receipt(receipt, %{field: bad_value})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_receipt(%Receipt{} = receipt, attrs) do
+    receipt
+    |> Receipt.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Deletes a receipt.
+
+  ## Examples
+
+      iex> delete_receipt(receipt)
+      {:ok, %Receipt{}}
+
+      iex> delete_receipt(receipt)
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def delete_receipt(%Receipt{} = receipt) do
+    Repo.delete(receipt)
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking receipt changes.
+
+  ## Examples
+
+      iex> change_receipt(receipt)
+      %Ecto.Changeset{data: %Receipt{}}
+
+  """
+  def change_receipt(%Receipt{} = receipt, attrs \\ %{}) do
+    Receipt.changeset(receipt, attrs)
   end
 end

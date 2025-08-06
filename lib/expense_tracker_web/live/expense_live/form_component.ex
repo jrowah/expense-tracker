@@ -32,6 +32,14 @@ defmodule ExpenseTrackerWeb.ExpenseLive.FormComponent do
         <.input field={@form[:notes]} type="text" label="Notes" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Expense</.button>
+          <.button
+            type="button"
+            phx-click="upload_receipt"
+            phx-target={@myself}
+            class="bg-green-600 hover:bg-green-700"
+          >
+            Upload Receipt
+          </.button>
         </:actions>
       </.simple_form>
     </div>
@@ -59,6 +67,11 @@ defmodule ExpenseTrackerWeb.ExpenseLive.FormComponent do
 
   def handle_event("save", %{"expense" => expense_params}, socket) do
     save_expense(socket, socket.assigns.action, expense_params)
+  end
+
+  def handle_event("upload_receipt", _params, socket) do
+    notify_parent(:upload_receipt)
+    {:noreply, socket}
   end
 
   defp save_expense(socket, :edit, expense_params) do

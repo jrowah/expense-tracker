@@ -6,7 +6,10 @@ defmodule ExpenseTrackerWeb.ExpenseLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :expenses, Expenses.list_expenses())}
+    {:ok,
+     socket
+     |> stream(:expenses, Expenses.list_expenses())
+     |> assign(:show_upload_modal, false)}
   end
 
   @impl true
@@ -38,6 +41,14 @@ defmodule ExpenseTrackerWeb.ExpenseLive.Index do
     socket
     |> assign(:page_title, "Listing Expenses")
     |> assign(:expense, nil)
+    |> assign(:show_upload_modal, false)
+  end
+
+  defp apply_action(socket, :upload_receipt, _params) do
+    socket
+    |> assign(:page_title, "Upload Receipt")
+    |> assign(:expense, nil)
+    |> assign(:show_upload_modal, true)
   end
 
   @impl true
@@ -47,11 +58,34 @@ defmodule ExpenseTrackerWeb.ExpenseLive.Index do
     {:noreply, stream_insert(socket, :expenses, expense_with_category)}
   end
 
+  def handle_info({ExpenseTrackerWeb.ExpenseLive.FormComponent, :upload_receipt}, socket) do
+    {:noreply, assign(socket, show_upload_modal: true)}
+  end
+
+  def handle_info({ExpenseTrackerWeb.ExpenseLive.ReceiptUploadComponent, :cancel}, socket) do
+    {:noreply, assign(socket, show_upload_modal: false)}
+  end
+
+  def handle_info(
+        {ExpenseTrackerWeb.ExpenseLive.ReceiptUploadComponent, {:receipt_uploaded, _receipt}},
+        socket
+      ) do
+    {:noreply, assign(socket, show_upload_modal: false)}
+  end
+
   @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     expense = Expenses.get_expense!(id)
     {:ok, _} = Expenses.delete_expense(expense)
 
     {:noreply, stream_delete(socket, :expenses, expense)}
+  end
+
+  def handle_event("show_upload_modal", _params, socket) do
+    {:noreply, assign(socket, show_upload_modal: true)}
+  end
+
+  def handle_event("hide_upload_modal", _params, socket) do
+    {:noreply, assign(socket, show_upload_modal: false)}
   end
 end

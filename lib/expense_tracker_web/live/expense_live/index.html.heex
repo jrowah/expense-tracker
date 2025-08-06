@@ -1,6 +1,9 @@
 <.header>
   Listing Expenses
   <:actions>
+    <.button phx-click="show_upload_modal">
+      Upload Receipt
+    </.button>
     <.link patch={~p"/expenses/new"}>
       <.button>New Expense</.button>
     </.link>
@@ -32,7 +35,12 @@
   </:action>
 </.table>
 
-<.modal :if={@live_action in [:new, :edit, :new_for_category]} id="expense-modal" show on_cancel={JS.patch(~p"/expenses")}>
+<.modal
+  :if={@live_action in [:new, :edit, :new_for_category]}
+  id="expense-modal"
+  show
+  on_cancel={JS.patch(~p"/expenses")}
+>
   <.live_component
     module={ExpenseTrackerWeb.ExpenseLive.FormComponent}
     id={@expense.id || :new}
@@ -40,5 +48,18 @@
     action={@live_action}
     expense={@expense}
     patch={~p"/expenses"}
+  />
+</.modal>
+
+<.modal
+  :if={assigns[:show_upload_modal]}
+  id="receipt-upload-modal"
+  show
+  on_cancel={JS.push("hide_upload_modal")}
+>
+  <.live_component
+    module={ExpenseTrackerWeb.ExpenseLive.ReceiptUploadComponent}
+    id="receipt-upload"
+    action={:upload_receipt}
   />
 </.modal>

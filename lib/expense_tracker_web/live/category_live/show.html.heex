@@ -20,11 +20,17 @@
 <div class="mt-8">
   <h3 class="text-lg font-semibold mb-4">Recent Expenses</h3>
   <div :if={Enum.empty?(@category.expenses)} class="text-gray-500 italic">
-    No expenses yet. <.link navigate={~p"/categories/#{@category.id}/expenses/new"} class="text-blue-600 hover:underline">Add One</.link>
+    No expenses yet.
+    <.link
+      navigate={~p"/categories/#{@category.id}/expenses/new"}
+      class="text-blue-600 hover:underline"
+    >
+      Add One
+    </.link>
   </div>
-  <.table 
+  <.table
     :if={not Enum.empty?(@category.expenses)}
-    id="category-expenses" 
+    id="category-expenses"
     rows={@category.expenses}
     row_click={fn expense -> JS.navigate(~p"/expenses/#{expense}") end}
   >
@@ -39,7 +45,12 @@
 
 <.back navigate={~p"/categories"}>Back to categories</.back>
 
-<.modal :if={@live_action == :edit} id="category-modal" show on_cancel={JS.patch(~p"/categories/#{@category}")}>
+<.modal
+  :if={@live_action == :edit}
+  id="category-modal"
+  show
+  on_cancel={JS.patch(~p"/categories/#{@category}")}
+>
   <.live_component
     module={ExpenseTrackerWeb.CategoryLive.FormComponent}
     id={@category.id}

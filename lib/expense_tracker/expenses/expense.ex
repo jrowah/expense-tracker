@@ -2,7 +2,7 @@ defmodule ExpenseTracker.Expenses.Expense do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias ExpenseTracker.Expenses.Category
+  alias ExpenseTracker.Expenses.{Category, Receipt}
 
   @primary_key {:id, :binary_id, autogenerate: true}
   @foreign_key_type :binary_id
@@ -13,6 +13,7 @@ defmodule ExpenseTracker.Expenses.Expense do
     field :notes, :string
 
     belongs_to :category, Category
+    has_one :receipt, Receipt
 
     timestamps(type: :utc_datetime)
   end
