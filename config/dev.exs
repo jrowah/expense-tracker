@@ -83,3 +83,6 @@ config :phoenix_live_view,
 
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
+
+# Configure OpenAI (set your API key as environment variable: export OPENAI_API_KEY=your_key_here)
+config :expense_tracker, :openai_api_key, System.get_env("OPENAI_API_KEY")
