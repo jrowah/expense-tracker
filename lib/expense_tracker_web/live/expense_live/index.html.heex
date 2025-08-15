@@ -32,7 +32,12 @@
   </:action>
 </.table>
 
-<.modal :if={@live_action in [:new, :edit, :new_for_category]} id="expense-modal" show on_cancel={JS.patch(~p"/expenses")}>
+<.modal
+  :if={@live_action in [:new, :edit, :new_for_category]}
+  id="expense-modal"
+  show
+  on_cancel={JS.patch(~p"/expenses")}
+>
   <.live_component
     module={ExpenseTrackerWeb.ExpenseLive.FormComponent}
     id={@expense.id || :new}
