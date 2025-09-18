@@ -20,6 +20,11 @@ defmodule ExpenseTrackerWeb.Router do
   scope "/", ExpenseTrackerWeb do
     pipe_through :browser
 
+    scope "/", Landing do
+      live "/", LandingLive, :index
+    end
+  end
+
     live "/", HomeLive.Index, :index
 
     live "/categories", CategoryLive.Index, :index
