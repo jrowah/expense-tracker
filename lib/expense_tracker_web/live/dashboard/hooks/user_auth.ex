@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.UserAuth do
+defmodule ExpenseTrackerWeb.Dashboard.Hooks.UserAuth do
   use ExpenseTrackerWeb, :verified_routes
 
   import Plug.Conn
@@ -135,13 +135,13 @@ defmodule ExpenseTrackerWeb.UserAuth do
       defmodule ExpenseTrackerWeb.PageLive do
         use ExpenseTrackerWeb, :live_view
 
-        on_mount {ExpenseTrackerWeb.UserAuth, :mount_current_user}
+        on_mount {ExpenseTrackerWeb.Dashboard.Hooks.UserAuth, :mount_current_user}
         ...
       end
 
   Or use the `live_session` of your router to invoke the on_mount callback:
 
-      live_session :authenticated, on_mount: [{ExpenseTrackerWeb.UserAuth, :ensure_authenticated}] do
+      live_session :authenticated, on_mount: [{ExpenseTrackerWeb.Dashboard.Hooks.UserAuth, :ensure_authenticated}] do
         live "/profile", ProfileLive, :index
       end
   """
@@ -158,7 +158,7 @@ defmodule ExpenseTrackerWeb.UserAuth do
       socket =
         socket
         |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/login")
+        |> Phoenix.LiveView.redirect(to: ~p"/access/login")
 
       {:halt, socket}
     end
@@ -208,7 +208,7 @@ defmodule ExpenseTrackerWeb.UserAuth do
       conn
       |> put_flash(:error, "You must log in to access this page.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/login")
+      |> redirect(to: ~p"/access/login")
       |> halt()
     end
   end
@@ -225,5 +225,5 @@ defmodule ExpenseTrackerWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: ~p"/"
+  defp signed_in_path(_conn), do: ~p"/dashboard"
 end

@@ -25,6 +25,40 @@ defmodule ExpenseTrackerWeb.Router do
     end
   end
 
+  # Other scopes may use custom stacks.
+  # scope "/api", ExpenseTrackerWeb do
+  #   pipe_through :api
+  # end
+
+  ## Authentication routes
+
+  scope "/auth", ExpenseTrackerWeb do
+    pipe_through :browser
+
+    post "/login", SessionController, :create
+
+    delete "/logout", SessionController, :delete
+  end
+
+  scope "/access", ExpenseTrackerWeb.Access do
+    pipe_through [:browser]
+
+    live_session :current_user,
+      on_mount: [{ExpenseTrackerWeb.Dashboard.Hooks.UserAuth, :mount_current_user}] do
+      live "/confirm/:token", ConfirmationLive, :edit
+      live "/confirm", ConfirmationInstructionsLive, :new
+    end
+
+    live_session :redirect_if_user_is_authenticated,
+      on_mount: [{ExpenseTrackerWeb.Dashboard.Hooks.UserAuth, :redirect_if_user_is_authenticated}] do
+      live "/register", RegistrationLive, :new
+      live "/login", LoginLive, :new
+      live "/confirmation_instructions", ConfirmationInstructionsLive, :new
+      live "/reset_password", ForgotPasswordLive, :new
+      live "/reset_password/:token", ResetPasswordLive, :edit
+    end
+  end
+
     live "/", HomeLive.Index, :index
 
     live "/categories", CategoryLive.Index, :index

@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.UserConfirmationLive do
+defmodule ExpenseTrackerWeb.Access.ConfirmationLive do
   use ExpenseTrackerWeb, :live_view
 
   alias ExpenseTracker.Accounts
@@ -16,7 +16,8 @@ defmodule ExpenseTrackerWeb.UserConfirmationLive do
       </.simple_form>
 
       <p class="text-center mt-4">
-        <.link href={~p"/register"}>Register</.link> | <.link href={~p"/login"}>Log in</.link>
+        <.link href={~p"/access/register"}>Register</.link>
+        | <.link href={~p"/access/login"}>Log in</.link>
       </p>
     </div>
     """
@@ -35,7 +36,7 @@ defmodule ExpenseTrackerWeb.UserConfirmationLive do
         {:noreply,
          socket
          |> put_flash(:info, "User confirmed successfully.")
-         |> redirect(to: ~p"/")}
+         |> redirect(to: ~p"/dashboard")}
 
       :error ->
         # If there is a current user and the account was already confirmed,

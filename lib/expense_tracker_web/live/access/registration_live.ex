@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.UserRegistrationLive do
+defmodule ExpenseTrackerWeb.Access.RegistrationLive do
   use ExpenseTrackerWeb, :live_view
 
   alias ExpenseTracker.Accounts
@@ -11,7 +11,7 @@ defmodule ExpenseTrackerWeb.UserRegistrationLive do
         Register for an account
         <:subtitle>
           Already registered?
-          <.link navigate={~p"/login"} class="font-semibold text-brand hover:underline">
+          <.link navigate={~p"/access/login"} class="font-semibold text-brand hover:underline">
             Log in
           </.link>
           to your account now.
@@ -24,7 +24,7 @@ defmodule ExpenseTrackerWeb.UserRegistrationLive do
         phx-submit="save"
         phx-change="validate"
         phx-trigger-action={@trigger_submit}
-        action={~p"/login?_action=registered"}
+        action={~p"/auth/login?_action=registered"}
         method="post"
       >
         <.error :if={@check_errors}>
@@ -59,7 +59,7 @@ defmodule ExpenseTrackerWeb.UserRegistrationLive do
         {:ok, _} =
           Accounts.deliver_user_confirmation_instructions(
             user,
-            &url(~p"/confirm/#{&1}")
+            &url(~p"/access/confirm/#{&1}")
           )
 
         changeset = Accounts.change_user_registration(user)

@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.UserForgotPasswordLive do
+defmodule ExpenseTrackerWeb.ForgotPasswordLive do
   use ExpenseTrackerWeb, :live_view
 
   alias ExpenseTracker.Accounts
@@ -20,7 +20,8 @@ defmodule ExpenseTrackerWeb.UserForgotPasswordLive do
         </:actions>
       </.simple_form>
       <p class="text-center text-sm mt-4">
-        <.link href={~p"/register"}>Register</.link> | <.link href={~p"/login"}>Log in</.link>
+        <.link href={~p"/access/register"}>Register</.link>
+        | <.link href={~p"/access/login"}>Log in</.link>
       </p>
     </div>
     """
@@ -34,7 +35,7 @@ defmodule ExpenseTrackerWeb.UserForgotPasswordLive do
     if user = Accounts.get_user_by_email(email) do
       Accounts.deliver_user_reset_password_instructions(
         user,
-        &url(~p"/reset_password/#{&1}")
+        &url(~p"/access/reset_password/#{&1}")
       )
     end
 
