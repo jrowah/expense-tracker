@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.ExpenseLive.FormComponent do
+defmodule ExpenseTrackerWeb.Dashboard.ExpenseLive.FormComponent do
   use ExpenseTrackerWeb, :live_component
 
   alias ExpenseTracker.Expenses
@@ -100,7 +100,7 @@ defmodule ExpenseTrackerWeb.ExpenseLive.FormComponent do
             {:noreply,
              socket
              |> put_flash(:info, "Expense created successfully")
-             |> push_navigate(to: ~p"/categories/#{expense.category_id}")}
+             |> push_navigate(to: ~p"/dashboard/categories/#{expense.category_id}")}
 
           :new ->
             {:noreply,
