@@ -36,7 +36,7 @@ defmodule ExpenseTrackerWeb.Access.ConfirmationLive do
         {:noreply,
          socket
          |> put_flash(:info, "User confirmed successfully.")
-         |> redirect(to: ~p"/dashboard")}
+         |> redirect(to: ~p"/access/login")}
 
       :error ->
         # If there is a current user and the account was already confirmed,

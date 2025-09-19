@@ -59,7 +59,7 @@ defmodule ExpenseTrackerWeb.Router do
     end
   end
 
-  scope "/dashboard", ExpenseTrackerWeb do
+  scope "/dashboard", ExpenseTrackerWeb.Dashboard do
     pipe_through [:browser, :require_authenticated_user]
 
     live "/", HomeLive.Index, :index
