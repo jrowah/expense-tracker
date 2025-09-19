@@ -1,9 +1,9 @@
-defmodule ExpenseTrackerWeb.UserAuthTest do
+defmodule ExpenseTrackerWeb.Dashboard.Hooks.UserAuthTest do
   use ExpenseTrackerWeb.ConnCase, async: true
 
   alias Phoenix.LiveView
   alias ExpenseTracker.Accounts
-  alias ExpenseTrackerWeb.UserAuth
+  alias ExpenseTrackerWeb.Dashboard.Hooks.UserAuth
   import ExpenseTracker.AccountsFixtures
 
   @remember_me_cookie "_expense_tracker_web_user_remember_me"

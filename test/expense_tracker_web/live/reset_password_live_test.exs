@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.UserResetPasswordLiveTest do
+defmodule ExpenseTrackerWeb.ResetPasswordLiveTest do
   use ExpenseTrackerWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest

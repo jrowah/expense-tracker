@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.UserSettingsLive do
+defmodule ExpenseTrackerWeb.SettingsLive do
   use ExpenseTrackerWeb, :live_view
 
   alias ExpenseTracker.Accounts
@@ -37,7 +37,7 @@ defmodule ExpenseTrackerWeb.UserSettingsLive do
         <.simple_form
           for={@password_form}
           id="password_form"
-          action={~p"/login?_action=password_updated"}
+          action={~p"/auth/login?_action=password_updated"}
           method="post"
           phx-change="validate_password"
           phx-submit="update_password"
@@ -83,7 +83,7 @@ defmodule ExpenseTrackerWeb.UserSettingsLive do
           put_flash(socket, :error, "Email change link is invalid or it has expired.")
       end
 
-    {:ok, push_navigate(socket, to: ~p"/settings")}
+    {:ok, push_navigate(socket, to: ~p"/dashboard/settings")}
   end
 
   def mount(_params, _session, socket) do
@@ -124,7 +124,7 @@ defmodule ExpenseTrackerWeb.UserSettingsLive do
         Accounts.deliver_user_update_email_instructions(
           applied_user,
           user.email,
-          &url(~p"/settings/confirm_email/#{&1}")
+          &url(~p"/dashboard/settings/confirm_email/#{&1}")
         )
 
         info = "A link to confirm your email change has been sent to the new address."

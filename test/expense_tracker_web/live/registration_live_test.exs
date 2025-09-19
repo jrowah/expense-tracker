@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.UserRegistrationLiveTest do
+defmodule ExpenseTrackerWeb.RegistrationLiveTest do
   use ExpenseTrackerWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest

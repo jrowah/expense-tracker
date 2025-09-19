@@ -33,7 +33,7 @@ defmodule ExpenseTrackerWeb.SessionController do
             |> put_flash(:info, info)
             |> UserAuth.login_user(user, user_params)
 
-          DateTime.diff(user.inserted_at, DateTime.utc_now(), :second) <= 60 ->
+          DateTime.diff(DateTime.utc_now(), user.inserted_at, :second) <= 60 ->
             conn
             |> put_flash(
               :info,

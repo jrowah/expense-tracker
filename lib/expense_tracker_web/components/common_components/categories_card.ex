@@ -10,7 +10,7 @@ defmodule ExpenseTrackerWeb.CommonComponents.CategoriesCard do
 
   def category_card(assigns) do
     ~H"""
-    <.link navigate={~p"/categories/#{@category.id}"} class="hover:text-blue-600">
+    <.link navigate={~p"/dashboard/categories/#{@category.id}"} class="hover:text-blue-600">
       <div class="bg-white rounded-lg border border-gray-200 p-8 shadow-sm hover:shadow-md transition-shadow">
         <div class="flex items-center justify-between">
           <h3 class="text-xl font-semibold text-gray-900">

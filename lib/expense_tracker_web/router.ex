@@ -1,7 +1,7 @@
 defmodule ExpenseTrackerWeb.Router do
   use ExpenseTrackerWeb, :router
 
-  import ExpenseTrackerWeb.UserAuth
+  import ExpenseTrackerWeb.Dashboard.Hooks.UserAuth
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -59,6 +59,9 @@ defmodule ExpenseTrackerWeb.Router do
     end
   end
 
+  scope "/dashboard", ExpenseTrackerWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
     live "/", HomeLive.Index, :index
 
     live "/categories", CategoryLive.Index, :index
@@ -75,12 +78,13 @@ defmodule ExpenseTrackerWeb.Router do
 
     live "/expenses/:id", ExpenseLive.Show, :show
     live "/expenses/:id/show/edit", ExpenseLive.Show, :edit
-  end
 
-  # Other scopes may use custom stacks.
-  # scope "/api", ExpenseTrackerWeb do
-  #   pipe_through :api
-  # end
+    live_session :require_authenticated_user,
+      on_mount: [{ExpenseTrackerWeb.Dashboard.Hooks.UserAuth, :ensure_authenticated}] do
+      live "/settings", UserSettingsLive, :edit
+      live "/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+    end
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:expense_tracker, :dev_routes) do
@@ -96,44 +100,6 @@ defmodule ExpenseTrackerWeb.Router do
 
       live_dashboard "/dashboard", metrics: ExpenseTrackerWeb.Telemetry
       forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
-  end
-
-  ## Authentication routes
-
-  scope "/", ExpenseTrackerWeb do
-    pipe_through [:browser, :redirect_if_user_is_authenticated]
-
-    live_session :redirect_if_user_is_authenticated,
-      on_mount: [{ExpenseTrackerWeb.UserAuth, :redirect_if_user_is_authenticated}] do
-      live "/register", UserRegistrationLive, :new
-      live "/login", UserLoginLive, :new
-      live "/reset_password", UserForgotPasswordLive, :new
-      live "/reset_password/:token", UserResetPasswordLive, :edit
-    end
-
-    post "/login", UserSessionController, :create
-  end
-
-  scope "/", ExpenseTrackerWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    live_session :require_authenticated_user,
-      on_mount: [{ExpenseTrackerWeb.UserAuth, :ensure_authenticated}] do
-      live "/settings", UserSettingsLive, :edit
-      live "/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-    end
-  end
-
-  scope "/", ExpenseTrackerWeb do
-    pipe_through [:browser]
-
-    delete "/logout", UserSessionController, :delete
-
-    live_session :current_user,
-      on_mount: [{ExpenseTrackerWeb.UserAuth, :mount_current_user}] do
-      live "/confirm/:token", UserConfirmationLive, :edit
-      live "/confirm", UserConfirmationInstructionsLive, :new
     end
   end
 end

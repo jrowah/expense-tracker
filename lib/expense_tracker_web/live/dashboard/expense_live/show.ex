@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.ExpenseLive.Show do
+defmodule ExpenseTrackerWeb.Dashboard.ExpenseLive.Show do
   use ExpenseTrackerWeb, :live_view
 
   alias ExpenseTracker.Expenses

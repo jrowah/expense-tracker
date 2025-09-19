@@ -2,10 +2,10 @@
   Category {@category.id}
   <:subtitle>This is a category record from your database.</:subtitle>
   <:actions>
-    <.link patch={~p"/categories/#{@category}/show/edit"} phx-click={JS.push_focus()}>
+    <.link patch={~p"/dashboard/categories/#{@category}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit category</.button>
     </.link>
-    <.link navigate={~p"/categories/#{@category.id}/expenses/new"}>
+    <.link navigate={~p"/dashboard/categories/#{@category.id}/expenses/new"}>
       <.button>Add Expense</.button>
     </.link>
   </:actions>
@@ -22,7 +22,7 @@
   <div :if={Enum.empty?(@category.expenses)} class="text-gray-500 italic">
     No expenses yet.
     <.link
-      navigate={~p"/categories/#{@category.id}/expenses/new"}
+      navigate={~p"/dashboard/categories/#{@category.id}/expenses/new"}
       class="text-blue-600 hover:underline"
     >
       Add One
@@ -32,24 +32,24 @@
     :if={not Enum.empty?(@category.expenses)}
     id="category-expenses"
     rows={@category.expenses}
-    row_click={fn expense -> JS.navigate(~p"/expenses/#{expense}") end}
+    row_click={fn expense -> JS.navigate(~p"/dashboard/expenses/#{expense}") end}
   >
     <:col :let={expense} label="Description">{expense.description}</:col>
     <:col :let={expense} label="Amount">${expense.amount}</:col>
     <:col :let={expense} label="Date">{expense.date}</:col>
     <:action :let={expense}>
-      <.link navigate={~p"/expenses/#{expense}/edit"}>Edit</.link>
+      <.link navigate={~p"/dashboard/expenses/#{expense}/edit"}>Edit</.link>
     </:action>
   </.table>
 </div>
 
-<.back navigate={~p"/categories"}>Back to categories</.back>
+<.back navigate={~p"/dashboard/categories"}>Back to categories</.back>
 
 <.modal
   :if={@live_action == :edit}
   id="category-modal"
   show
-  on_cancel={JS.patch(~p"/categories/#{@category}")}
+  on_cancel={JS.patch(~p"/dashboard/categories/#{@category}")}
 >
   <.live_component
     module={ExpenseTrackerWeb.CategoryLive.FormComponent}
@@ -57,6 +57,6 @@
     title={@page_title}
     action={@live_action}
     category={@category}
-    patch={~p"/categories/#{@category}"}
+    patch={~p"/dashboard/categories/#{@category}"}
   />
 </.modal>

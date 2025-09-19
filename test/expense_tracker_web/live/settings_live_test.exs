@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.UserSettingsLiveTest do
+defmodule ExpenseTrackerWeb.SettingsLiveTest do
   use ExpenseTrackerWeb.ConnCase, async: true
 
   alias ExpenseTracker.Accounts

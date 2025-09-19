@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.UserSessionControllerTest do
+defmodule ExpenseTrackerWeb.Access.SessionControllerTest do
   use ExpenseTrackerWeb.ConnCase, async: true
 
   import ExpenseTracker.AccountsFixtures
