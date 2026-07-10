@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.HomeLive.Index do
+defmodule ExpenseTrackerWeb.Dashboard.HomeLive.Index do
   use ExpenseTrackerWeb, :live_view
 
   alias ExpenseTracker.Expenses

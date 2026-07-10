@@ -1,0 +1,2 @@
+alias ExpenseTracker.Accounts
+alias ExpenseTracker.Expenses
