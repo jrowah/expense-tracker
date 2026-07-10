@@ -56,13 +56,14 @@ defmodule ExpenseTracker.MixProject do
       {:finch, "~> 0.13"},
       {:telemetry_metrics, "~> 1.0"},
       {:telemetry_poller, "~> 1.0"},
-      {:gettext, "~> 0.26"},
+      {:gettext, "~> 1.0.2"},
       {:jason, "~> 1.2"},
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:oban, "~> 2.17"},
       {:req, "~> 0.5"},
-      {:fuzzy_compare, "~> 1.1"}
+      {:fuzzy_compare, "~> 1.1"},
+      {:cinder, "~> 0.9"}
     ]
   end
 

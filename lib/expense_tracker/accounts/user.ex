@@ -6,6 +6,8 @@ defmodule ExpenseTracker.Accounts.User do
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
+    field :is_admin, :boolean, default: false
+    field :is_super_admin, :boolean, default: false
     field :hashed_password, :string, redact: true
     field :current_password, :string, virtual: true, redact: true
     field :confirmed_at, :utc_datetime

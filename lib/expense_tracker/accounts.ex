@@ -350,4 +350,12 @@ defmodule ExpenseTracker.Accounts do
       {:error, :user, changeset, _} -> {:error, changeset}
     end
   end
+
+  @doc """
+  Returns a list of all users in the system.
+  """
+
+  def list_users do
+    Repo.all(User)
+  end
 end

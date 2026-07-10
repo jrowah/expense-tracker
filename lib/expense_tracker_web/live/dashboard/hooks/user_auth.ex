@@ -213,6 +213,17 @@ defmodule ExpenseTrackerWeb.Dashboard.Hooks.UserAuth do
     end
   end
 
+  def require_admin_user(conn, _opts) do
+    if conn.assigns[:current_user] && conn.assigns.current_user.is_admin do
+      conn
+    else
+      conn
+      |> put_flash(:error, "You must be an admin to access this page.")
+      |> redirect(to: signed_in_path(conn))
+      |> halt()
+    end
+  end
+
   defp put_token_in_session(conn, token) do
     conn
     |> put_session(:user_token, token)

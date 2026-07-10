@@ -1,4 +1,4 @@
-defmodule ExpenseTrackerWeb.Dashboard.ExpenseLive.FormComponent do
+defmodule ExpenseTrackerWeb.ExpenseLive.FormComponent do
   use ExpenseTrackerWeb, :live_component
 
   alias ExpenseTracker.Expenses

@@ -86,6 +86,17 @@ defmodule ExpenseTrackerWeb.Router do
     end
   end
 
+  scope "/admin", ExpenseTrackerWeb.Admin do
+    pipe_through [:browser, :require_authenticated_user, :require_admin_user]
+
+    live "/users", UserLive.Index, :index
+    live "/users/new", UserLive.Index, :new
+    live "/users/:id/edit", UserLive.Index, :edit
+
+    live "/users/:id", UserLive.Show, :show
+    live "/users/:id/show/edit", UserLive.Show, :edit
+  end
+
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:expense_tracker, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
